@@ -4,9 +4,12 @@ const auth = require('../middlewares/auth');
 
 // router.route('/').get(); // shows everthing
 router.route('/').get(handle.showPolls).post(auth, handle.createPoll);
-
 router.get('/user', auth, handle.usersPolls);
 
-router.route('/:id').get(handle.getPoll).post().delete(auth, handle.deletePoll);
+router
+  .route('/:id')
+  .get(handle.getPoll)
+  .post(auth, handle.vote)
+  .delete(auth, handle.deletePoll);
 
 module.exports = router;

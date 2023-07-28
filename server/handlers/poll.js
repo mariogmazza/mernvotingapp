@@ -29,7 +29,6 @@ exports.usersPolls = async (req, res, next) => {
 
 exports.createPoll = async (req, res, next) => {
   try {
-    console.log(req.decoded);
     const { id } = req.decoded;
     const user = await db.User.findById(id);
 
@@ -66,7 +65,11 @@ exports.getPoll = async (req, res, next) => {
     if (!poll) throw new Error('No poll found');
 
     res.status(200).json(poll);
-  } catch (err) {}
+  } catch (err) {
+    err.messages = err.message;
+    err.status = 400;
+    next(err);
+  }
 };
 
 exports.deletePoll = async (req, res, next) => {
@@ -75,6 +78,7 @@ exports.deletePoll = async (req, res, next) => {
     const { id: userId } = req.decoded;
 
     const poll = await db.Poll.findById(pollId);
+
     if (!poll) throw new Error('No Poll found');
     if (poll.user.toString() !== userId) {
       throw new Error('Unauthorized access');
@@ -90,9 +94,39 @@ exports.deletePoll = async (req, res, next) => {
 
 exports.vote = async (req, res, next) => {
   try {
-    const poll = await db.Poll.findById(id);
+    const { id: pollId } = req.params;
+    const { id: userId } = req.decoded;
+
+    if (answer) {
+      const poll = await db.Poll.findById(pollId);
+
+      if (!poll) throw new Error('No poll found');
+      const vote = poll.options.map(option => {
+        if (option.option === answer) {
+          return {
+            option: option.option,
+            _id: option._id,
+            votes: option.votes + 1,
+          };
+        } else {
+          return option;
+        }
+      });
+
+      if (poll.voted.filter(user => user.toString() === userId).length <= 0) {
+        poll.voted.push(userId);
+        poll.options = vote;
+        await poll.save();
+
+        res.status(202).json(poll);
+      } else {
+        throw new Error('Already voted');
+      }
+    } else {
+      throw new Error('No answer provied');
+    }
   } catch (err) {
     err.status = 400;
-    next(400);
+    next(err);
   }
 };

@@ -11,7 +11,9 @@ module.exports.notFound = (req, res, next) => {
 };
 
 module.exports.errors = (err, req, res, next) => {
+  console.log('handler: ERROR ==', typeof err);
+  console.log('NEXT', Object.entries(next));
   res.status(err.status || 400).json({
-    err: err.message || 'Something went wrong',
+    message: err.message,
   });
 };
