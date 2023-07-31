@@ -9,11 +9,17 @@ const App = () => {
       username: 'username',
       password: 'password',
     });
+    setData(results)
 
-    console.log(results);
+    console.log(typeof results);
   }, []);
 
-  return <div>App workd</div>;
+
+  return <div>
+    <h1>App workd</h1>
+      <div>This is data: {data.username? data.username : 'nada'}</div>
+      
+      </div>;
 };
 
 export default App;
