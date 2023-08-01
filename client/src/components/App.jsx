@@ -1,25 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { addError, removeError } from '../store/reducers/error';
+
+// import api from '../services/api';
 
 const App = () => {
-  const [data, setData] = useState([]);
+  const errorState = useSelector(state => state.error.message);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const results = api.call('post', 'auth/login', {
-      username: 'username',
-      password: 'password',
-    });
-    setData(results)
+  const setGlobalandLocal = () => {
+    dispatch(addError({ message: 'errors loding crap' }));
+  };
 
-    console.log(typeof results);
-  }, []);
+  const removeGlobalandLocal = () => {
+    dispatch(removeError());
+  };
 
+  const asyncSetGlobalandLocal = () => {
+    dispatch(addError({ message: 'errors loding crap' }));
+  };
 
-  return <div>
-    <h1>App workd</h1>
-      <div>This is data: {data.username? data.username : 'nada'}</div>
-      
-      </div>;
+  const asyncRemoveGlobalandLocal = () => {
+    dispatch(removeError());
+  };
+  return (
+    <div>
+      <h1>App workd</h1>
+      <button onClick={setGlobalandLocal}>set Error</button>
+      <h2>To error?: {errorState.message}</h2>
+      <button onClick={removeGlobalandLocal}>remove Error</button>
+      <br />
+      <br />
+      <button>async set error</button>
+    </div>
+  );
 };
 
 export default App;
