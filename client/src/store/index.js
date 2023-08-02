@@ -3,10 +3,12 @@
 // import rootReducer from 'redux-thunk';
 
 import { configureStore } from '@reduxjs/toolkit';
-import errorReducer from './reducers/error';
+import errorReducer from './reducers/errorSlice';
+import loginReducer from './reducers/loginSlice';
 
 export default configureStore({
   reducer: {
-    error: errorReducer,
+    errorState: errorReducer,
+    loginState: loginReducer,
   },
 });

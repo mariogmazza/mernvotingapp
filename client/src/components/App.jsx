@@ -1,11 +1,13 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { addError, removeError } from '../store/reducers/error';
-
-// import api from '../services/api';
+import { addError, removeError } from '../store/reducers/errorSlice';
+import { fetchUserLogin } from '../store/reducers/loginSlice';
+import { displayCurrentUser } from '../store/reducers/loginSlice';
 
 const App = () => {
-  const errorState = useSelector(state => state.error.message);
+  const errorState = useSelector(store => store.errorState.message);
+  const isLoading = useSelector(store => store.loginState.isLoading);
+  const currentUser = useSelector(store => store.loginState.currentUser);
   const dispatch = useDispatch();
 
   const setGlobalandLocal = () => {
@@ -16,13 +18,10 @@ const App = () => {
     dispatch(removeError());
   };
 
-  const asyncSetGlobalandLocal = () => {
-    dispatch(addError({ message: 'errors loding crap' }));
+  const asyncLogin = () => {
+    dispatch(fetchUserLogin({ username: 'kelvin', password: 'password' }));
   };
 
-  const asyncRemoveGlobalandLocal = () => {
-    dispatch(removeError());
-  };
   return (
     <div>
       <h1>App workd</h1>
@@ -31,7 +30,19 @@ const App = () => {
       <button onClick={removeGlobalandLocal}>remove Error</button>
       <br />
       <br />
-      <button>async set error</button>
+      <button onClick={asyncLogin}>Async Login</button>
+      {isLoading ? (
+        <div>
+          <h2>Hey I am loading...</h2>
+        </div>
+      ) : (
+        <h2>{currentUser}</h2>
+      )}
+      <hr />
+      <br />
+      <button onClick={() => dispatch(displayCurrentUser())}>
+        mod current user
+      </button>
     </div>
   );
 };
