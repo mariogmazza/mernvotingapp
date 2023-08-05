@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addError, removeError } from '../store/reducers/errorSlice';
 import { fetchUserLogin } from '../store/reducers/loginSlice';
-import { displayCurrentUser } from '../store/reducers/loginSlice';
 
 const App = () => {
   const errorState = useSelector(store => store.errorState.message);
@@ -11,7 +10,8 @@ const App = () => {
   const dispatch = useDispatch();
 
   const setGlobalandLocal = () => {
-    dispatch(addError({ message: 'errors loding crap' }));
+    // dispatch(addError({ message: 'errors loding crap' }));
+    dispatch(addError(errorState));
   };
 
   const removeGlobalandLocal = () => {
@@ -19,14 +19,15 @@ const App = () => {
   };
 
   const asyncLogin = () => {
-    dispatch(fetchUserLogin({ username: 'kelvin', password: 'password' }));
+    const data = { username: 'kelvin', password: 'password' };
+    dispatch(fetchUserLogin(data));
   };
 
   return (
     <div>
       <h1>App workd</h1>
       <button onClick={setGlobalandLocal}>set Error</button>
-      <h2>To error?: {errorState.message}</h2>
+      <h2>To error?: {errorState}</h2>
       <button onClick={removeGlobalandLocal}>remove Error</button>
       <br />
       <br />
@@ -40,9 +41,6 @@ const App = () => {
       )}
       <hr />
       <br />
-      <button onClick={() => dispatch(displayCurrentUser())}>
-        mod current user
-      </button>
     </div>
   );
 };

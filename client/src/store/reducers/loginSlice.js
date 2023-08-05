@@ -1,26 +1,29 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../services/api';
+import API from '../../services/api';
+import { addError, removeError } from './errorSlice';
 
 const initialState = {
-  userData: [],
+  userPreferrences: [],
   isLoading: false,
-  error: '',
   currentUser: '',
 };
 
 export const fetchUserLogin = createAsyncThunk(
   'login/fetchUser',
-  async ({ username, password }, thunkAPI) => {
+  async (data, thunkAPI) => {
     try {
-      console.log(thunkAPI);
-      const response = await api.call('post', 'auth/login', {
-        username: username,
-        password: password,
-      });
-      // console.log(response);
-      return response;
+      const { token, ...user } = await API.call('post', 'auth/login', data);
+
+      localStorage.setItem('jwtToken', token);
+      API.setToken(token);
+      thunkAPI.dispatch(removeError());
+      return user;
     } catch (err) {
-      return err.message;
+      thunkAPI.dispatch(addError(err.response.data.message));
+      if (!err.response) {
+        throw err;
+      }
+      return thunkAPI.rejectWithValue(err.response.data);
     }
   },
 );
@@ -29,29 +32,42 @@ export const loginSlice = createSlice({
   name: 'login',
   initialState,
   reducers: {
-    displayCurrentUser: (state, action) => {
-      let username = state.currentUser;
-      if (username === 'kelvin') {
-        username = username + '3';
-      }
-      state.currentUser = username;
+    updateUserPreferences: (state, action) => {
+      //to-do
+    },
+    logout: (state, action) => {
+      localStorage.clear();
+      API.setToken(null);
+      state.currentUser = '';
+      state.error = '';
+      state.userPreferrences = [];
+      state.isLoading = false;
     },
   },
-  extraReducers: {
-    [fetchUserLogin.pending]: (state, action) => {
-      state.isLoading = true;
-    },
-    [fetchUserLogin.fulfilled]: (state, action) => {
-      state.isLoading = false;
-      state.error = '';
-      console.log(action.payload);
-      state.userData = [action.payload];
-      state.currentUser = action.payload.username;
-    },
-    [fetchUserLogin.rejected]: (state, action) => {
-      state.isLoading = false;
-      state.error = action.payload.message;
-    },
+  extraReducers: builder => {
+    builder
+      .addCase(fetchUserLogin.pending, (state, action) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUserLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.message) {
+          state.userPreferrences = [];
+          state.currentUser = '';
+          localStorage.clear();
+          API.setToken(null);
+        } else {
+          state.currentUser = action.payload.username;
+          state.userPreferrences = [action.payload]; // to-do add to DB a user pref field
+        }
+      })
+      .addCase(fetchUserLogin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.userPreferrences = [];
+        state.currentUser = '';
+        localStorage.clear();
+        API.setToken(null);
+      });
   },
 });
 

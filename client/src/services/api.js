@@ -10,7 +10,8 @@ export const setToken = token => {
 
 export const call = async (method, path, data) => {
   const response = await axios[method](`/${path}`, data);
+  // console.log(response);
   return response.data;
 };
 
-export default { call };
+export default { setToken, call };
