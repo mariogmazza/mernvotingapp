@@ -6,6 +6,7 @@ const initialState = {
   userPreferrences: [],
   isLoading: false,
   currentUser: '',
+  isAuth: false,
 };
 
 export const fetchUserLogin = createAsyncThunk(
